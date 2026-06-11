@@ -7,8 +7,8 @@
 window.APP_CONFIG = {
   /* ---------------- Supabase ---------------- */
   // Supabase 프로젝트 > Settings > API 에서 복사
-  SUPABASE_URL: "https://aterhjyfhyqywamnvlls.supabase.co",
-  SUPABASE_ANON_KEY: "sb_publishable_CDXu6KqH4FXEsXeDEpy62w_rAOWgN7N",  // publishable(공개) 키 — 노출돼도 됨
+  SUPABASE_URL: "https://djkzooqdnzrivombmpmx.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_OAfED9w1GKAmXBLaJSC_EA_IB47eHOA",  // publishable(공개) 키
 
   // 학생/작품 테이블 이름 (DB에 맞게)
   STUDENTS_TABLE: "students",

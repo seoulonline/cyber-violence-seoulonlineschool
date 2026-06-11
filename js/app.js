@@ -157,7 +157,10 @@
   }
 
   /* ---------- 이미지 업로드 (Apps Script) ---------- */
-  $("#pickFileBtn").addEventListener("click", () => $("#fileInput").click());
+  $("#pickFileBtn").addEventListener("click", () => {
+    if (!getSession()) { toast("먼저 로그인해 주세요."); openLogin(); return; }
+    $("#fileInput").click();
+  });
   $("#fileInput").addEventListener("change", async e => {
     const file = e.target.files[0]; if (!file) return;
     const st = $("#uploadStatus");
