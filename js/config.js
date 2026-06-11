@@ -17,7 +17,7 @@ window.APP_CONFIG = {
   /* ---------------- 이미지 업로드 (Google Apps Script) ---------------- */
   // 앱스크립트 웹앱(doPost) 배포 URL. 완성되면 여기에 붙여넣으세요.
   // 비어 있으면 업로드 대신 "링크 직접 입력" 모드로 동작합니다.
-  APPSCRIPT_UPLOAD_URL: "https://script.google.com/macros/s/AKfycbx4pwilyWiLY8aG1IilZV2IAQPVI7_zVPwb4l7msxICbl6cNTRZu1ihoojGxp1tMaM/exec",
+  APPSCRIPT_UPLOAD_URL: "https://script.google.com/macros/s/AKfycbzAjUprEWnXRLz7Cma6Nb1CyiSnbZVAUTnE-DHvR_QIP5PmY9e9HYLWi5qOgnFFv7v7/exec",
 
   /* ---------------- 상품(경품) 안내 - 임시 하드코딩 ---------------- */
   PRIZES: [
