@@ -227,12 +227,22 @@
     </div>
   </div>
 
+  <!-- ===== 제출 완료 모달 ===== -->
+  <div class="modal-overlay" id="doneModal" hidden>
+    <div class="glass modal done-modal">
+      <button class="modal-close" id="doneClose" aria-label="닫기">✕</button>
+      <div class="done-emoji">🎉</div>
+      <h3>제출 완료!</h3>
+      <p class="modal-sub">소중한 작품 고마워요. 친구들의 작품도 보고 ❤️ 좋아요를 눌러 응원해 주세요!</p>
+      <button class="btn btn-primary full" id="goGalleryBtn">참여작품 보러가기</button>
+    </div>
+  </div>
+
   <!-- ===== 작품 상세 모달 ===== -->
   <div class="modal-overlay" id="workModal" hidden>
     <div class="glass modal work-modal">
       <button class="modal-close" id="workClose" aria-label="닫기">✕</button>
       <img id="workImg" class="work-img" alt="포스터" />
-      <h3 id="workTitle"></h3>
       <p id="workExp" class="work-exp"></p>
       <button class="btn btn-primary like-btn" id="likeBtn">❤️ <span id="likeCount">0</span></button>
       <p id="workMsg" class="form-msg"></p>

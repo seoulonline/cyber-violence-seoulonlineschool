@@ -218,8 +218,17 @@
       .eq("id", s.id);
     if (error) { msg(m, "제출 실패: " + error.message, false); return; }
     msg(m, "✅ 제출 완료! 갤러리에서 확인하세요.", true);
-    toast("작품이 제출되었습니다!");
     loadGallery();
+    $("#doneModal").hidden = false;
+  });
+
+  /* ---------- 제출 완료 모달 ---------- */
+  const doneModal = $("#doneModal");
+  $("#doneClose").addEventListener("click", () => (doneModal.hidden = true));
+  doneModal.addEventListener("click", e => { if (e.target === doneModal) doneModal.hidden = true; });
+  $("#goGalleryBtn").addEventListener("click", () => {
+    doneModal.hidden = true;
+    $("#gallery").scrollIntoView({ behavior: "smooth" });
   });
 
   /* ---------- 갤러리 ---------- */
@@ -246,8 +255,7 @@
       <article class="glass work-tile" data-id="${w.id}">
         <img class="thumb" loading="lazy" src="${esc(w.submit_img_link)}" alt="포스터" onerror="this.style.opacity=0.3" />
         <div class="meta">
-          <h4>${esc(w.stu_id || "익명")} 학생</h4>
-          <p class="exp">${esc(w.submit_exp || "")}</p>
+          <p class="exp">${esc(w.submit_exp || "작품 설명이 없습니다.")}</p>
           <p class="likes">❤️ ${w.like_num || 0}</p>
         </div>
       </article>`).join("");
@@ -267,8 +275,7 @@
     if (!w) return;
     activeWork = w;
     $("#workImg").src = w.submit_img_link;
-    $("#workTitle").textContent = `${w.stu_id || "익명"} 학생`;
-    $("#workExp").textContent = w.submit_exp || "";
+    $("#workExp").textContent = w.submit_exp || "작품 설명이 없습니다.";
     $("#likeCount").textContent = w.like_num || 0;
     const liked = myVotes.has(w.id);
     $("#likeBtn").classList.toggle("liked", liked);
