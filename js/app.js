@@ -40,11 +40,13 @@
 
   /* ---------- 정적 콘텐츠 채우기 ---------- */
   $("#eventPeriod").textContent = CFG.EVENT_PERIOD || "";
-  $("#winnerCount").textContent = CFG.WINNER_COUNT || "n";
   (function renderPrizes() {
+    const prizes = CFG.PRIZES || [];
+    const total = prizes.reduce((sum, p) => sum + (p.count || 0), 0);
+    $("#winnerCount").textContent = total || "n";
     const grid = $("#prizeGrid");
-    grid.innerHTML = (CFG.PRIZES || []).map(p =>
-      `<article class="glass prize"><div class="emoji">${esc(p.emoji || "🎁")}</div><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p></article>`
+    grid.innerHTML = prizes.map(p =>
+      `<article class="glass prize"><div class="emoji">${esc(p.emoji || "🎁")}</div><h3>${esc(p.name)}</h3><p class="prize-count">${esc(p.count)}명 선정</p></article>`
     ).join("");
   })();
 

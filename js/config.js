@@ -19,14 +19,12 @@ window.APP_CONFIG = {
   // 비어 있으면 업로드 대신 "링크 직접 입력" 모드로 동작합니다.
   APPSCRIPT_UPLOAD_URL: "https://script.google.com/macros/s/AKfycbzAjUprEWnXRLz7Cma6Nb1CyiSnbZVAUTnE-DHvR_QIP5PmY9e9HYLWi5qOgnFFv7v7/exec",
 
-  /* ---------------- 상품(경품) 안내 - 임시 하드코딩 ---------------- */
+  /* ---------------- 상품(경품) 안내 ---------------- */
   PRIZES: [
-    { name: "상품 1", desc: "추후 안내 예정", emoji: "🎁" },
-    { name: "상품 2", desc: "추후 안내 예정", emoji: "🎁" },
-    { name: "상품 3", desc: "추후 안내 예정", emoji: "🎁" },
+    { name: "LAMY 샤프", count: 3, emoji: "✏️" },
+    { name: "Smash 샤프", count: 4, emoji: "✒️" },
+    { name: "과자 세트", count: 5, emoji: "🍪" },
   ],
-  // 추첨 인원 (n명) - 정해지면 수정
-  WINNER_COUNT: 10,
 
   /* ---------------- 이벤트 기간 (표시용) ---------------- */
   EVENT_PERIOD: "2026. 6. 15.(월) ~ 6. 19.(금)",

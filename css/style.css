@@ -200,8 +200,9 @@ a { color: inherit; text-decoration: none; }
 .prize-grid .prize { padding: 28px 22px; text-align: center; transition: transform 0.2s; }
 .prize:hover { transform: translateY(-5px); }
 .prize .emoji { font-size: 2.6rem; }
-.prize h3 { color: var(--purple-deep); margin: 10px 0 4px; }
+.prize h3 { color: var(--purple-deep); margin: 10px 0 6px; }
 .prize p { color: var(--muted); font-size: 0.9rem; }
+.prize .prize-count { display: inline-block; font-weight: 700; color: var(--teal-deep); background: rgba(79,173,167,0.16); padding: 5px 14px; border-radius: 999px; font-size: 0.9rem; }
 
 /* ===== 푸터 ===== */
 .footer-glass { margin-top: 40px; background: rgba(61,22,92,0.92); color: #efe7f7; backdrop-filter: blur(10px); }
