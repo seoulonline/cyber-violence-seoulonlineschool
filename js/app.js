@@ -13,13 +13,16 @@
   if (sbReady) {
     sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
   }
-  const T_STU = CFG.STUDENTS_TABLE || "students";
-  const T_VOTE = CFG.VOTES_TABLE || "votes";
+  const V_WORKS = CFG.WORKS_VIEW || "cv_works_public";
 
   /* ---------- 세션 (localStorage) ---------- */
   const SESSION_KEY = "sos_session";
   function getSession() {
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; }
+    try {
+      const s = JSON.parse(localStorage.getItem(SESSION_KEY));
+      // token 이 없는 예전 방식 세션은 무효로 보고 다시 로그인받습니다.
+      return s && s.token ? s : null;
+    } catch { return null; }
   }
   function setSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
   function clearSession() { localStorage.removeItem(SESSION_KEY); }
@@ -127,34 +130,22 @@
     if (!name || !school || !grade || !klass || !num) { msg(m, "모든 항목을 입력해 주세요.", false); return; }
 
     msg(m, "확인 중…", true);
-    // 1) 기존 계정 조회 (학교·학년·반·번호로 식별)
-    const { data: found, error: selErr } = await sb.from(T_STU).select("*")
-      .eq("stu_school", school).eq("stu_grade", grade).eq("stu_class", klass).eq("stu_num", num)
-      .maybeSingle();
-    if (selErr) { msg(m, "오류: " + selErr.message, false); return; }
-
-    if (found) {
-      // 이미 등록됨 → 이름 확인 후 로그인 (중복 계정 생성 방지)
-      if (found.stu_id && found.stu_id !== name) {
-        msg(m, "해당 학년·반·번호로 이미 등록된 계정이 있어요. 이름이 일치하지 않습니다.", false); return;
-      }
-      loginSuccess(found, school, grade, klass, num); return;
-    }
-    // 2) 신규 등록
-    const { data: ins, error: insErr } = await sb.from(T_STU).insert({
-      stu_id: name, stu_school: school, stu_grade: grade, stu_class: klass, stu_num: num, like_num: 0
-    }).select().single();
-    if (insErr) {
-      // unique 위반 등
-      msg(m, "이미 등록된 계정이거나 등록에 실패했습니다: " + insErr.message, false); return;
-    }
-    loginSuccess(ins, school, grade, klass, num);
+    // 조회·등록·이름 대조를 DB 함수 한 번에 맡깁니다.
+    // (학생 명단 테이블은 익명 조회가 막혀 있어 브라우저로 개인정보가 내려오지 않습니다)
+    const { data, error } = await sb.rpc("cv_login_or_register", {
+      p_name: name, p_school: school, p_grade: grade, p_class: klass, p_num: num
+    });
+    if (error) { msg(m, error.message, false); return; }
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) { msg(m, "로그인에 실패했습니다. 다시 시도해 주세요.", false); return; }
+    loginSuccess(row, school, grade, klass, num);
   });
 
   function loginSuccess(row, school, grade, klass, num) {
-    setSession({ id: row.id, name: row.stu_id, school, grade, class: klass, num });
+    // token 은 본인 확인용 비밀값입니다. 제출·좋아요 때 함께 보냅니다.
+    setSession({ id: row.id, token: row.token, name: row.name, school, grade, class: klass, num });
     refreshAuthUI(); closeLogin();
-    toast(`${row.stu_id}님 환영합니다!`);
+    toast(`${row.name}님 환영합니다!`);
     loadMyVotes();
   }
 
@@ -215,9 +206,10 @@
     if (!link) { msg(m, "이미지 링크가 필요합니다.", false); return; }
 
     msg(m, "제출 중…", true);
-    const { error } = await sb.from(T_STU)
-      .update({ submit_img_link: link, submit_exp: exp })
-      .eq("id", s.id);
+    // token 이 맞는 본인 행만 수정됩니다. (id 만 바꿔 남의 작품을 덮어쓸 수 없음)
+    const { error } = await sb.rpc("cv_submit_work", {
+      p_id: s.id, p_token: s.token, p_link: link, p_exp: exp
+    });
     if (error) { msg(m, "제출 실패: " + error.message, false); return; }
     msg(m, "✅ 제출 완료! 갤러리에서 확인하세요.", true);
     loadGallery();
@@ -240,16 +232,20 @@
   async function loadMyVotes() {
     if (!sbReady) return;
     const s = getSession(); if (!s) { myVotes = new Set(); return; }
-    const { data } = await sb.from(T_VOTE).select("work_id").eq("voter_id", s.id);
-    myVotes = new Set((data || []).map(v => v.work_id));
+    const { data } = await sb.rpc("cv_my_votes", { p_voter: s.id, p_token: s.token });
+    myVotes = new Set(data || []);
   }
 
   async function loadGallery() {
     const grid = $("#galleryGrid");
     if (!sbReady) { grid.innerHTML = `<p class="empty-hint">⚠️ Supabase 설정 후 작품이 표시됩니다. (js/config.js)</p>`; return; }
     grid.innerHTML = `<p class="empty-hint">불러오는 중…</p>`;
-    let q = sb.from(T_STU).select("*").not("submit_img_link", "is", null);
-    q = currentSort === "like" ? q.order("like_num", { ascending: false }) : q.order("id", { ascending: false });
+    // 공개 뷰에는 작품 정보만 들어 있습니다.
+    // (예전 select("*") 는 전교생 이름·학교·학년·반·번호까지 함께 내려받았습니다)
+    let q = sb.from(V_WORKS).select("*");
+    q = currentSort === "like"
+      ? q.order("like_num", { ascending: false }).order("id", { ascending: false })
+      : q.order("created_at", { ascending: false });
     const { data, error } = await q;
     if (error) { grid.innerHTML = `<p class="empty-hint">불러오기 오류: ${esc(error.message)}</p>`; return; }
     if (!data || !data.length) { grid.innerHTML = `<p class="empty-hint">아직 제출된 작품이 없어요. 첫 작품을 올려보세요! 🎨</p>`; return; }
@@ -295,15 +291,18 @@
     if (!activeWork) return;
     if (myVotes.has(activeWork.id)) { msg(m, "이미 좋아요한 작품이에요. (작품당 1회)", false); return; }
 
-    const { error } = await sb.from(T_VOTE).insert({ voter_id: s.id, work_id: activeWork.id });
+    // DB 트리거가 like_num 을 갱신하고, 갱신된 값을 그대로 돌려줍니다.
+    const { data: newCount, error } = await sb.rpc("cv_like_work", {
+      p_voter: s.id, p_token: s.token, p_work: activeWork.id
+    });
     if (error) {
       // unique 위반 = 이미 누름
       msg(m, error.code === "23505" ? "이미 좋아요한 작품이에요." : "오류: " + error.message, false);
       return;
     }
     myVotes.add(activeWork.id);
-    activeWork.like_num = (activeWork.like_num || 0) + 1;
-    $("#likeCount").textContent = activeWork.like_num;
+    activeWork.like_num = newCount;
+    $("#likeCount").textContent = newCount;
     $("#likeBtn").classList.add("liked");
     msg(m, "❤️ 좋아요 완료!", true);
     loadGallery();
