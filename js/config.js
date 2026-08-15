@@ -7,12 +7,14 @@
 window.APP_CONFIG = {
   /* ---------------- Supabase ---------------- */
   // Supabase 프로젝트 > Settings > API 에서 복사
-  SUPABASE_URL: "https://djkzooqdnzrivombmpmx.supabase.co",
-  SUPABASE_ANON_KEY: "sb_publishable_OAfED9w1GKAmXBLaJSC_EA_IB47eHOA",  // publishable(공개) 키
+  SUPABASE_URL: "https://zvdozshnwtfwthuotynb.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_fn84m-fNZGN9kJ4o1wRo0Q_GkVov5-g",  // publishable(공개) 키
 
-  // 학생/작품 테이블 이름 (DB에 맞게)
-  STUDENTS_TABLE: "students",
-  VOTES_TABLE: "votes",
+  // 갤러리 공개 뷰 이름.
+  // 학생 개인정보(이름·학교·학년·반·번호)가 담긴 cv_students 테이블에는
+  // 익명 접근이 차단되어 있고, 읽기는 이 뷰로만 이루어집니다.
+  // 로그인·제출·좋아요는 DB 함수(RPC)를 통해 처리됩니다.
+  WORKS_VIEW: "cv_works_public",
 
   /* ---------------- 이미지 업로드 (Google Apps Script) ---------------- */
   // 앱스크립트 웹앱(doPost) 배포 URL. 완성되면 여기에 붙여넣으세요.
